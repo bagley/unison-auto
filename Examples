@@ -1,0 +1,73 @@
+
+==== No Changes ====
+
+Contacting server...
+Connected [//inspire1//home/macgyver/docs -> //sakura//home/macgyver/docs]
+Looking for changes
+  Waiting for changes from server                                       
+Reconciling changes
+Nothing to do: replicas have not changed since last sync.
+
+>> Exits with 0
+
+==== Changes that we can do =====
+
+[macgyver@sakura ~]$ unison Docs -ui text -auto -batch ; echo $?
+Contacting server...
+Connected [//inspire1//home/macgyver/docs -> //sakura//home/macgyver/docs]
+Looking for changes
+  Waiting for changes from server                                       
+Reconciling changes
+         <---- deleted    finances/new  
+Propagating updates
+UNISON 2.40.63 started propagating changes at 10:26:47.84 on 12 Nov 2012
+[BGN] Deleting finances/new from /home/macgyver/docs
+[END] Deleting finances/new
+UNISON 2.40.63 finished propagating changes at 10:26:47.85 on 12 Nov 2012
+Saving synchronizer state
+Synchronization complete at 10:26:47  (1 item transferred, 0 skipped, 0 failed)
+
+>> Exits with 0
+
+
+==== Conflicting Files =====
+
+[macgyver@sakura ~]$ unison Docs -ui text -auto -batch ; echo $?
+Contacting server...
+Connected [//inspire1//home/macgyver/docs -> //sakura//home/macgyver/docs]
+Looking for changes
+  Waiting for changes from server                                       
+Reconciling changes
+new file <-?-> new file   finances/new  
+local        : new file           modified on 2012-11-12 at 10:27:36  size 5         rw-rw-r--
+inspire1     : new file           modified on 2012-11-12 at 10:27:14  size 4         rw-r--r--
+No updates to propagate
+
+>> Exits with 1
+
+
+==== Conflicting Files, yet some we can do =====
+It will skip the conflicting ones, but still do the rest
+
+[macgyver@sakura ~]$ unison Docs -ui text -auto -batch ; echo $?
+Contacting server...
+Connected [//inspire1//home/macgyver/docs -> //sakura//home/macgyver/docs]
+Looking for changes
+  Waiting for changes from server                                       
+Reconciling changes
+new file <-?-> new file   finances/new  
+local        : new file           modified on 2012-11-12 at 10:27:36  size 5         rw-rw-r--
+inspire1     : new file           modified on 2012-11-12 at 10:27:14  size 4         rw-r--r--
+         <---- new file   finances/new1  
+Propagating updates
+UNISON 2.40.63 started propagating changes at 10:32:21.91 on 12 Nov 2012
+[CONFLICT] Skipping finances/new
+[BGN] Copying finances/new1 from //inspire1//home/macgyver/docs to /home/macgyver/docs
+Shortcut: copied /home/macgyver/docs/finances/new1 from local file /home/macgyver/docs/websites/WebEngines and Code/copermine/coppermine/update_history/lang/.svn/text-base/.goutputstream-Q4GLPV.svn-base
+[END] Copying finances/new1
+UNISON 2.40.63 finished propagating changes at 10:32:21.91 on 12 Nov 2012
+Saving synchronizer state
+Synchronization complete at 10:32:21  (1 item transferred, 1 skipped, 0 failed)
+  skipped: finances/new
+
+>> Exits with 1
