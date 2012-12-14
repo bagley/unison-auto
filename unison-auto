@@ -15,16 +15,16 @@ our $how_often=2;
 our @profiles=();
 
 # what are we to do?
-die "Usage: $0 [--text | --ui]" if ( $#ARGV != 0 );
+die "Usage: $0 [--text | --gui]" if ( $#ARGV != 0 );
 my $action;
 if ( $ARGV[0] eq "--text" ) {
-	$action="tx";
+	$action="text";
 }
-elsif ( $ARGV[0] eq "--ui" ) {
-	$action="ui";
+elsif ( $ARGV[0] eq "--gui" ) {
+	$action="gui";
 }
 else {
-	die "Usage: $0 [--text | --ui]";
+	die "Usage: $0 [--text | --gui]";
 }
 
 
@@ -49,17 +49,16 @@ unless ( my $config_return = do $config ) {
 # main, check every hour
 foreach my $profile (@profiles) {
 	
-	if ( $action eq "tx" ) {
-		print "tx\n";
-		# system("unison-2.40", $profile, "-auto", "-batch", "-ui", "text");
+	if ( $action eq "text" ) {
+		system("unison-2.40 \"$profile\" -auto -batch -ui text > /dev/null 2>&1");
 		# check for exit status
 		if ( $? >> 8 != 0 ) {
+			# email errors
 			system("echo $profile did not finish syncing | mail -s \"Unison - $profile\" $ENV{USER}");
 		}
 	}
 	else {
-		print "ui\n";
-		# system("unison-2.40",$profile);
+		system("unison-2.40",$profile);
 	}
 }
 
