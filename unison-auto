@@ -1,12 +1,67 @@
 #!/usr/bin/perl
 
+# use this to run updates
+
+# options --text (auto) --ui (prompts)
+
 use strict;
 use warnings;
 
-# only one instance of this program
+# change this if you need to
+my $config="$ENV{HOME}/.config/unison-auto.conf";
 
+# set defaults
+our $how_often=2;
+our @profiles=();
+
+# what are we to do?
+die "Usage: $0 [--text | --ui]" if ( $#ARGV != 0 );
+my $action;
+if ( $ARGV[0] eq "--text" ) {
+	$action="tx";
+}
+elsif ( $ARGV[0] eq "--ui" ) {
+	$action="ui";
+}
+else {
+	die "Usage: $0 [--text | --ui]";
+}
+
+
+# only one instance of this program
+use Fcntl qw(:flock);
+unless (flock(DATA, LOCK_EX|LOCK_NB)) {
+    print "$0 is already running. Exiting.\n";
+    exit(1);
+}
 
 # load config
+if ( not -f $config ) {
+    die "failed to find config $config";
+}
+unless ( my $config_return = do $config ) {
+    die "couldn't parse $config: $@" if $@;
+    die "couldn't do $config: $!" unless defined $config_return;
+    die "couldn't run $config" unless $config_return;
+    # die "other error"; # not needed
+}
 
+# main, check every hour
+foreach my $profile (@profiles) {
+	
+	if ( $action eq "tx" ) {
+		print "tx\n";
+		# system("unison-2.40", $profile, "-auto", "-batch", "-ui", "text");
+		# check for exit status
+		if ( $? >> 8 != 0 ) {
+			system("echo $profile did not finish syncing | mail -s \"Unison - $profile\" $ENV{USER}");
+		}
+	}
+	else {
+		print "ui\n";
+		# system("unison-2.40",$profile);
+	}
+}
 
-# main
+# release lock
+__DATA__
