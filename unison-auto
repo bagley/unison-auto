@@ -54,7 +54,20 @@ foreach my $profile (@profiles) {
 		# check for exit status
 		if ( $? >> 8 != 0 ) {
 			# email errors
-			system("echo $profile did not finish syncing | mail -s \"Unison - $profile\" $ENV{USER}");
+			if ( not open(MAIL, " | mail -s \"Unison - $profile\" $ENV{USER}" ) ) {
+				print "Error: could not sent mail!\n";
+				next;
+			}
+			print MAIL "$profile did not finish syncing\n\n";
+			if ( -f "$ENV{HOME}/unison.log" ) {
+				print MAIL "Unison log output:\n\n";
+				my @tail = `tail -n 15 "$ENV{HOME}/unison.log"`;
+				# no need for chomp
+				print MAIL @tail;
+			}
+			close(MAIL); # send it
+			# old method:
+			# system("echo $profile did not finish syncing | mail -s \"Unison - $profile\" $ENV{USER}");
 		}
 	}
 	else {
