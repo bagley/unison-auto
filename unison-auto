@@ -55,12 +55,14 @@ foreach my $profile (@profiles) {
 		system("unison-2.40 \"$profile\" -auto -batch -ui text > /dev/null 2>&1");
 		# check for exit status
 		if ( $? >> 8 != 0 ) {
+			my $error_code=$? >> 8;
 			# email errors
 			if ( not open(MAIL, " | mail -s \"Unison - $profile\" $ENV{USER}" ) ) {
 				print "Error: could not sent mail!\n";
 				next;
 			}
-			print MAIL "$profile did not finish syncing\n\n";
+			print MAIL "$profile did not finish syncing\n";
+			print MAIL "Exited with error code $error_code\n\n";
 			if ( -f "$ENV{HOME}/unison.log" ) {
 				print MAIL "Unison log output:\n\n";
 				my @tail = `tail -n 15 "$ENV{HOME}/unison.log"`;
