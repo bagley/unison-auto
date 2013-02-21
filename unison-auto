@@ -31,7 +31,9 @@ else {
 # only one instance of this program
 use Fcntl qw(:flock);
 unless (flock(DATA, LOCK_EX|LOCK_NB)) {
-    print "$0 is already running. Exiting.\n";
+    if ( $action ne "text" ) {
+	print "$0 is already running. Exiting.\n";
+    }
     exit(1);
 }
 
