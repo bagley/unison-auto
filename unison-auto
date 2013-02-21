@@ -52,10 +52,16 @@ unless ( my $config_return = do $config ) {
 foreach my $profile (@profiles) {
 	
 	if ( $action eq "text" ) {
+		
 		system("unison-2.40 \"$profile\" -auto -batch -ui text > /dev/null 2>&1");
 		# check for exit status
-		if ( $? >> 8 != 0 ) {
-			my $error_code=$? >> 8;
+		my $error_code=$? >> 8;
+		if ( $error_code == 3 ) {
+			# print "Failed to connect to server\n";
+			next;
+		}
+		elsif ( $error_code != 0 ) {
+			
 			# email errors
 			if ( not open(MAIL, " | mail -s \"Unison - $profile\" $ENV{USER}" ) ) {
 				print "Error: could not sent mail!\n";
