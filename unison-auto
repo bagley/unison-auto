@@ -15,7 +15,8 @@ our $how_often=2;
 our @profiles=();
 
 # what are we to do?
-die "Usage: $0 [--text | --gui]" if ( $#ARGV != 0 );
+my $verbose=0;
+die "Usage: $0 [--text | --gui | --vtext]" if ( $#ARGV != 0 );
 my $action;
 if ( $ARGV[0] eq "--text" ) {
 	$action="text";
@@ -23,8 +24,12 @@ if ( $ARGV[0] eq "--text" ) {
 elsif ( $ARGV[0] eq "--gui" ) {
 	$action="gui";
 }
+elsif ( $ARGV[0] eq "--vtext" ) {
+        $action="text";
+        $verbose=1;
+}
 else {
-	die "Usage: $0 [--text | --gui]";
+	die "Usage: $0 [--text | --gui | --vtext]";
 }
 
 
@@ -48,13 +53,19 @@ unless ( my $config_return = do $config ) {
     # die "other error"; # not needed
 }
 
+my $exit_error_code=0;
 # main, check every hour
 foreach my $profile (@profiles) {
 	
 	if ( $action eq "text" ) {
 		
-		system("unison-2.40 \"$profile\" -auto -batch -ui text > /dev/null 2>&1");
-		# check for exit status
+		if ( $verbose ) {
+		    system("unison-2.40 \"$profile\" -auto -batch -ui text");
+		}
+	        else {
+		    system("unison-2.40 \"$profile\" -auto -batch -ui text > /dev/null 2>&1");
+		}
+                # check for exit status
 		my $error_code=$? >> 8;
 		if ( $error_code == 3 ) {
 			# print "Failed to connect to server\n";
@@ -62,6 +73,13 @@ foreach my $profile (@profiles) {
 		}
 		elsif ( $error_code != 0 ) {
 			
+		        $exit_error_code++;
+		    
+		        if ( $verbose ) {
+			    print "\n\n=======================\n";
+                            print "Error: did not sync fully\n";
+			    print "=========================\n\n";
+			}
 			# email errors
 			if ( not open(MAIL, " | mail -s \"Unison - $profile\" $ENV{USER}" ) ) {
 				print "Error: could not sent mail!\n";
@@ -84,6 +102,10 @@ foreach my $profile (@profiles) {
 		system("unison-2.40",$profile);
 	}
 }
+
+
+# print "Exiting with code $exit_error_code\n";
+exit $exit_error_code;
 
 # release lock
 __DATA__
